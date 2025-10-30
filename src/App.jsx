@@ -10,6 +10,7 @@ import InsurancePool from './pages/InsurancePool';
 import Telemetry from './pages/Telemetry';
 import Mempool from './pages/Mempool';
 import Audit from './pages/Audit';
+import Auth from './components/auth/Auth';
 
 function App() {
   const [route, setRoute] = useState(window.location.pathname);
@@ -34,6 +35,8 @@ function App() {
           <Mempool />
         ) : route === '/audit' ? (
           <Audit />
+        ) : route === '/auth' ? (
+          <Auth />
         ) : (
           <>
             <Hero />
@@ -42,7 +45,7 @@ function App() {
           </>
         )}
       </main>
-      <Footer />
+      {route !== '/auth' && <Footer />}
     </div>
   );
 }

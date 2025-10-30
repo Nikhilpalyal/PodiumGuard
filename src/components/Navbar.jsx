@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import './Navbar.css';
 import img1 from '../assets/1.jpg';
 import img2 from '../assets/2.jpg';
@@ -7,6 +8,18 @@ import img5 from '../assets/5.jpg';
 import img6 from '../assets/6.jpg';
 
 function Navbar() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const checkUser = () => {
+      const currentUser = localStorage.getItem('currentUser');
+      setUser(currentUser ? JSON.parse(currentUser) : null);
+    };
+
+    checkUser();
+    window.addEventListener('userStateChanged', checkUser);
+    return () => window.removeEventListener('userStateChanged', checkUser);
+  }, []);
   const navigate = (e, path) => {
     e.preventDefault();
     if (window.location.pathname === path) return;
@@ -48,7 +61,32 @@ function Navbar() {
             <img src={img1} alt="Mempool Scanner" className="nav-image" />
           </a>
         </div>
-        <a href="/login" className="login-btn" onClick={(e) => navigate(e, '/login')}>LOGIN</a>
+        {user ? (
+          <div className="user-section">
+            <div className="user-dropdown">
+              <span className="username">{user.username}</span>
+              <div className="dropdown-content">
+                <a href="/profile" className="dropdown-item" onClick={(e) => navigate(e, '/profile')}>
+                  Edit Profile
+                </a>
+                <button 
+                  className="dropdown-item"
+                  onClick={() => {
+                    localStorage.removeItem('currentUser');
+                    window.dispatchEvent(new Event('userStateChanged'));
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <a href="/auth" className="login-btn" onClick={(e) => navigate(e, '/auth')}>
+            <span className="btn-text">LOGIN</span>
+            <div className="btn-highlight"></div>
+          </a>
+        )}
       </div>
     </nav>
   );
