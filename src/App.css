@@ -30,10 +30,3 @@
   100% { transform: translate(40px, 40px); }
 }
 
-main {
-  margin: 0;
-  padding: 0;
-  position: relative;
-  z-index: 1;
-}
-

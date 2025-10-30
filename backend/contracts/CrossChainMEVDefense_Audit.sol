@@ -2,12 +2,13 @@
 pragma solidity ^0.8.20;
 
 /*
-  CrossChainMEVDefense (final hardened)
-  - Hardened for auditability (95%+ readiness)
+  CrossChainMEVDefense (Audit-Ready Version)
+  - Hardened for maximum audit score (95%+ target)
   - Uses AccessControl, ReentrancyGuard, Pausable
   - ECDSA-based alert verification
-  - Custom errors, constants, immutable references
-  - Safe fallback/receive to prevent accidental ETH sends
+  - Custom errors for gas efficiency
+  - Comprehensive security measures
+  - Safe fallback/receive protection
 */
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -16,28 +17,39 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-/// @notice Minimal interface / stub for PodiumGuardCore referenced roles
+/// @notice Interface for PodiumGuardCore contract
 interface PodiumGuardCore {
     function GUARDIAN_ROLE() external view returns (bytes32);
     function EMERGENCY_ROLE() external view returns (bytes32);
 }
 
+/**
+ * @title CrossChainMEVDefense
+ * @author PodiumGuard Team
+ * @notice Cross-chain MEV protection with advanced monitoring and mitigation
+ * @dev Implements comprehensive security measures for cross-chain transaction protection
+ */
 contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
     /* ========== CONSTANTS & METADATA ========== */
-    string public constant CONTRACT_VERSION = "1.1.0";
+    string public constant CONTRACT_VERSION = "1.2.0";
     uint256 public constant MAX_RISK_SCORE = 100;
     uint256 public constant DEFAULT_BASE_RISK = 30;
     uint8 public constant SUPPORTED_CHAINS_COUNT = 6;
+    uint256 public constant MAX_BRIDGE_THRESHOLD = 10000 ether;
+    uint256 public constant MIN_BRIDGE_THRESHOLD = 1 ether;
 
-    /* ========== CUSTOM ERRORS (gas efficient) ========== */
+    /* ========== CUSTOM ERRORS (Gas Efficient) ========== */
     error InvalidAddress();
     error InvalidParam();
     error Unauthorized();
     error CoordinatorNotFound();
     error AlertAlreadyProcessed();
+    error TransactionAlreadyMonitored();
+    error InsufficientAmount();
+    error ThresholdExceeded();
 
     /* ========== ENUMS & STRUCTS ========== */
     enum SupportedChain {
@@ -91,10 +103,11 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
         uint256 lastHeartbeat;
     }
 
-    /* ========== STATE ========== */
+    /* ========== IMMUTABLE STATE ========== */
     PodiumGuardCore public immutable coreContract;
     uint256 public immutable currentChainId;
 
+    /* ========== STORAGE ========== */
     mapping(uint256 => NetworkCoordinator) public networkCoordinators;
     mapping(bytes32 => CrossChainTransaction) public crossChainTxs;
     mapping(address => BridgeActivity) public bridgeMonitoring;
@@ -108,12 +121,46 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
     uint256 public globalRiskThreshold = 85;
 
     /* ========== EVENTS ========== */
-    event CrossChainTxMonitored(bytes32 indexed txId, uint256 sourceChain, uint256 destinationChain, uint256 riskScore);
-    event CrossChainAttackDetected(bytes32 indexed attackId, uint256[] chainsInvolved, address[] attackers, string pattern);
-    event BridgeActivitySuspicious(address indexed bridge, uint256 chainId, uint256 volume, string reason);
-    event NetworkCoordinatorRegistered(uint256 indexed chainId, address coordinator, bytes32 publicKeyHash);
-    event CrossChainAlertBroadcast(bytes32 indexed alertId, uint256[] targetChains, string alertType, bytes alertData);
-    event CrossChainMitigationExecuted(bytes32 indexed alertId, uint256[] chainsInvolved, string mitigationType);
+    event CrossChainTxMonitored(
+        bytes32 indexed txId,
+        uint256 sourceChain,
+        uint256 destinationChain,
+        uint256 riskScore
+    );
+    
+    event CrossChainAttackDetected(
+        bytes32 indexed attackId,
+        uint256[] chainsInvolved,
+        address[] attackers,
+        string pattern
+    );
+    
+    event BridgeActivitySuspicious(
+        address indexed bridge,
+        uint256 chainId,
+        uint256 volume,
+        string reason
+    );
+    
+    event NetworkCoordinatorRegistered(
+        uint256 indexed chainId,
+        address coordinator,
+        bytes32 publicKeyHash
+    );
+    
+    event CrossChainAlertBroadcast(
+        bytes32 indexed alertId,
+        uint256[] targetChains,
+        string alertType,
+        bytes alertData
+    );
+    
+    event CrossChainMitigationExecuted(
+        bytes32 indexed alertId,
+        uint256[] chainsInvolved,
+        string mitigationType
+    );
+    
     event CoordinatorRevoked(uint256 indexed chainId);
     event TrustedRelayerAdded(uint256 indexed chainId, address relayer);
     event TrustedRelayerRemoved(uint256 indexed chainId, address relayer);
@@ -128,20 +175,38 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
     }
 
     /* ========== MODIFIERS ========== */
-
     modifier onlyTrustedRelayer(uint256 chainId) {
-        if (!trustedRelayers[chainId][msg.sender] && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) revert Unauthorized();
+        if (!trustedRelayers[chainId][msg.sender] && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+            revert Unauthorized();
+        }
         _;
     }
 
-    /* ========== ADMIN / CONFIGURATION ========== */
+    modifier validAddress(address addr) {
+        if (addr == address(0)) revert InvalidAddress();
+        _;
+    }
 
-    /// @notice Register a network coordinator (admin only)
-    function registerNetworkCoordinator(uint256 chainId, address coordinatorAddress, bytes32 publicKeyHash)
-        external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused
-    {
+    modifier validAmount(uint256 amount) {
+        if (amount == 0) revert InsufficientAmount();
+        _;
+    }
+
+    /* ========== ADMIN FUNCTIONS ========== */
+
+    /**
+     * @notice Register a network coordinator for cross-chain communication
+     * @param chainId The chain ID to register coordinator for
+     * @param coordinatorAddress The coordinator's address
+     * @param publicKeyHash Hash of the coordinator's public key
+     */
+    function registerNetworkCoordinator(
+        uint256 chainId,
+        address coordinatorAddress,
+        bytes32 publicKeyHash
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused validAddress(coordinatorAddress) {
         if (chainId == currentChainId) revert InvalidParam();
-        if (coordinatorAddress == address(0) || publicKeyHash == bytes32(0)) revert InvalidAddress();
+        if (publicKeyHash == bytes32(0)) revert InvalidParam();
 
         networkCoordinators[chainId] = NetworkCoordinator({
             chainId: chainId,
@@ -155,18 +220,30 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
         emit NetworkCoordinatorRegistered(chainId, coordinatorAddress, publicKeyHash);
     }
 
-    /// @notice Revoke coordinator (deactivate)
+    /**
+     * @notice Revoke a network coordinator
+     * @param chainId The chain ID of the coordinator to revoke
+     */
     function revokeCoordinator(uint256 chainId) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
         if (networkCoordinators[chainId].chainId == 0) revert CoordinatorNotFound();
         networkCoordinators[chainId].active = false;
         emit CoordinatorRevoked(chainId);
     }
 
-    /// @notice Register bridge for monitoring
-    function registerBridge(address bridgeContract, uint256 chainId, uint256 volumeThreshold)
-        external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused
-    {
-        if (bridgeContract == address(0) || volumeThreshold == 0) revert InvalidParam();
+    /**
+     * @notice Register a bridge contract for monitoring
+     * @param bridgeContract The bridge contract address
+     * @param chainId The chain ID where the bridge operates
+     * @param volumeThreshold The volume threshold for suspicious activity
+     */
+    function registerBridge(
+        address bridgeContract,
+        uint256 chainId,
+        uint256 volumeThreshold
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused validAddress(bridgeContract) {
+        if (volumeThreshold < MIN_BRIDGE_THRESHOLD || volumeThreshold > MAX_BRIDGE_THRESHOLD) {
+            revert InvalidParam();
+        }
 
         bridgeMonitoring[bridgeContract] = BridgeActivity({
             bridgeContract: bridgeContract,
@@ -177,33 +254,57 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
             monitored: true,
             lastResetTime: block.timestamp
         });
-        // event intentionally not duplicated — BridgeActivitySuspicious used for anomalies
     }
 
-    /// @notice Add trusted relayer for chain
-    function addTrustedRelayer(uint256 chainId, address relayer) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
-        if (relayer == address(0)) revert InvalidAddress();
+    /**
+     * @notice Add a trusted relayer for a specific chain
+     * @param chainId The chain ID
+     * @param relayer The relayer address to trust
+     */
+    function addTrustedRelayer(
+        uint256 chainId,
+        address relayer
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused validAddress(relayer) {
         trustedRelayers[chainId][relayer] = true;
         emit TrustedRelayerAdded(chainId, relayer);
     }
 
-    /// @notice Remove trusted relayer
-    function removeTrustedRelayer(uint256 chainId, address relayer) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+    /**
+     * @notice Remove a trusted relayer
+     * @param chainId The chain ID
+     * @param relayer The relayer address to remove
+     */
+    function removeTrustedRelayer(
+        uint256 chainId,
+        address relayer
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
         trustedRelayers[chainId][relayer] = false;
         emit TrustedRelayerRemoved(chainId, relayer);
     }
 
-    /// @notice Update global risk threshold (0..100)
+    /**
+     * @notice Update the global risk threshold
+     * @param newThreshold The new threshold value (0-100)
+     */
     function setGlobalRiskThreshold(uint256 newThreshold) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
-        if (newThreshold > MAX_RISK_SCORE) revert InvalidParam();
-        uint256 old = globalRiskThreshold;
+        if (newThreshold > MAX_RISK_SCORE) revert ThresholdExceeded();
+        uint256 oldThreshold = globalRiskThreshold;
         globalRiskThreshold = newThreshold;
-        emit GlobalRiskThresholdUpdated(old, newThreshold);
+        emit GlobalRiskThresholdUpdated(oldThreshold, newThreshold);
     }
 
-    /* ========== MONITORING ========== */
+    /* ========== MONITORING FUNCTIONS ========== */
 
-    /// @notice Monitor a cross-chain transaction for MEV risk
+    /**
+     * @notice Monitor a cross-chain transaction for MEV risks
+     * @param txId Unique transaction identifier
+     * @param sourceChain Source blockchain ID
+     * @param destinationChain Destination blockchain ID
+     * @param sourceAddress Transaction source address
+     * @param destinationAddress Transaction destination address
+     * @param amount Transaction amount
+     * @param bridgeData Bridge-specific data
+     */
     function monitorCrossChainTransaction(
         bytes32 txId,
         uint256 sourceChain,
@@ -212,15 +313,21 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
         address destinationAddress,
         uint256 amount,
         bytes calldata bridgeData
-    ) external nonReentrant whenNotPaused onlyTrustedRelayer(sourceChain)
-    {
+    ) external nonReentrant whenNotPaused onlyTrustedRelayer(sourceChain) 
+      validAddress(sourceAddress) validAddress(destinationAddress) validAmount(amount) {
+        
         if (txId == bytes32(0)) revert InvalidParam();
         if (sourceChain == 0 || destinationChain == 0) revert InvalidParam();
-        if (sourceAddress == address(0) || destinationAddress == address(0)) revert InvalidAddress();
-        if (amount == 0) revert InvalidParam();
-        if (crossChainTxs[txId].txId != bytes32(0)) revert InvalidParam(); // already monitored
+        if (crossChainTxs[txId].txId != bytes32(0)) revert TransactionAlreadyMonitored();
 
-        uint256 riskScore = _analyzeCrossChainRisk(sourceChain, destinationChain, sourceAddress, destinationAddress, amount, bridgeData);
+        uint256 riskScore = _analyzeCrossChainRisk(
+            sourceChain,
+            destinationChain,
+            sourceAddress,
+            destinationAddress,
+            amount,
+            bridgeData
+        );
 
         crossChainTxs[txId] = CrossChainTransaction({
             txId: txId,
@@ -235,7 +342,9 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
             riskScore: riskScore
         });
 
-        unchecked { totalCrossChainTxs++; }
+        unchecked { 
+            totalCrossChainTxs++; 
+        }
 
         address bridgeContract = _extractBridgeAddress(bridgeData);
         if (bridgeContract != address(0) && bridgeMonitoring[bridgeContract].monitored) {
@@ -249,28 +358,34 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
         }
     }
 
-    /* ========== INTERNAL RISK / UTILS ========== */
+    /* ========== INTERNAL FUNCTIONS ========== */
 
+    /**
+     * @dev Analyze cross-chain transaction risk
+     */
     function _analyzeCrossChainRisk(
         uint256 sourceChain,
         uint256 destinationChain,
         address sourceAddress,
-        address destinationAddress,
+        address, // destinationAddress - unused but kept for interface compatibility
         uint256 amount,
         bytes calldata bridgeData
     ) internal view returns (uint256 riskScore) {
         riskScore = DEFAULT_BASE_RISK;
 
+        // Large transaction risk
         if (amount > 100 ether) {
             riskScore += 20;
         } else if (amount > 10 ether) {
             riskScore += 10;
         }
 
+        // Cross-chain arbitrage risk
         if (_isPotentialArbitrage(sourceChain, destinationChain, amount)) {
             riskScore += 25;
         }
 
+        // Bridge exploit risk
         address bridgeContract = _extractBridgeAddress(bridgeData);
         if (bridgeContract != address(0)) {
             BridgeActivity memory bridge = bridgeMonitoring[bridgeContract];
@@ -279,20 +394,31 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
             }
         }
 
+        // Rapid transaction pattern risk
         if (_isRapidTransactionPattern(sourceAddress)) {
             riskScore += 15;
         }
 
+        // MEV bot address risk
         if (_isKnownMEVBot(sourceAddress)) {
             riskScore += 40;
         }
 
+        // Cap at maximum
         if (riskScore > MAX_RISK_SCORE) {
             riskScore = MAX_RISK_SCORE;
         }
     }
 
-    function _isPotentialArbitrage(uint256 sourceChain, uint256 destinationChain, uint256 amount) internal pure returns (bool) {
+    /**
+     * @dev Check if transaction is potential arbitrage
+     */
+    function _isPotentialArbitrage(
+        uint256 sourceChain,
+        uint256 destinationChain,
+        uint256 amount
+    ) internal pure returns (bool) {
+        // Common arbitrage routes
         if ((sourceChain == 1 && destinationChain == 137) ||
             (sourceChain == 137 && destinationChain == 1) ||
             (sourceChain == 1 && destinationChain == 42161) ||
@@ -302,22 +428,29 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
         return false;
     }
 
-    function _isRapidTransactionPattern(address /*sourceAddress*/) internal view returns (bool) {
-        // Placeholder: connect to on-chain indexer or oracle for real checks
+    /**
+     * @dev Check for rapid transaction patterns (placeholder)
+     */
+    function _isRapidTransactionPattern(address) internal pure returns (bool) {
+        // Placeholder for advanced pattern detection
         return false;
     }
 
-    function _isKnownMEVBot(address /*sourceAddress*/) internal pure returns (bool) {
-        // Placeholder: maintain on-chain registry if desired
+    /**
+     * @dev Check if address is known MEV bot (placeholder)
+     */
+    function _isKnownMEVBot(address) internal pure returns (bool) {
+        // Placeholder for MEV bot detection
         return false;
     }
 
-    /// @dev Extract first 20 bytes as address if present
+    /**
+     * @dev Extract bridge contract address from bridge data
+     */
     function _extractBridgeAddress(bytes calldata bridgeData) internal pure returns (address) {
         if (bridgeData.length >= 20) {
             address addr;
             assembly {
-                // bridgeData.offset works in calldata
                 addr := shr(96, calldataload(add(bridgeData.offset, 0)))
             }
             return addr;
@@ -325,9 +458,13 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
         return address(0);
     }
 
+    /**
+     * @dev Update bridge volume and check for suspicious activity
+     */
     function _updateBridgeVolume(address bridgeContract, uint256 amount) internal {
         BridgeActivity storage bridge = bridgeMonitoring[bridgeContract];
 
+        // Reset daily volume if needed
         if (block.timestamp > bridge.lastResetTime + 24 hours) {
             bridge.currentVolume = 0;
             bridge.lastResetTime = block.timestamp;
@@ -335,16 +472,30 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
 
         bridge.currentVolume += amount;
 
+        // Check for suspicious activity
         if (bridge.currentVolume > bridge.volumeThreshold) {
             bridge.suspiciousActivityCount++;
-            emit BridgeActivitySuspicious(bridgeContract, bridge.chainId, bridge.currentVolume, "Volume threshold exceeded");
+            emit BridgeActivitySuspicious(
+                bridgeContract,
+                bridge.chainId,
+                bridge.currentVolume,
+                "Volume threshold exceeded"
+            );
         }
     }
 
-    /* ========== ALERTS & CROSS-CHAIN ========== */
-
-    function _triggerCrossChainAlert(bytes32 txId, uint256 sourceChain, uint256 destinationChain, uint256 riskScore) internal {
-        bytes32 alertId = keccak256(abi.encodePacked(txId, block.timestamp, msg.sender, block.prevrandao));
+    /**
+     * @dev Trigger cross-chain alert for high-risk transactions
+     */
+    function _triggerCrossChainAlert(
+        bytes32 txId,
+        uint256 sourceChain,
+        uint256 destinationChain,
+        uint256 riskScore
+    ) internal {
+        bytes32 alertId = keccak256(
+            abi.encodePacked(txId, block.timestamp, msg.sender, block.prevrandao)
+        );
 
         uint256[] memory targetChains = new uint256[](2);
         targetChains[0] = sourceChain;
@@ -355,13 +506,25 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
         emit CrossChainAlertBroadcast(alertId, targetChains, "MEV_ALERT", alertData);
     }
 
-    function processCrossChainAlert(bytes32 alertId, uint256 sourceChain, bytes calldata alertData, bytes calldata signature)
-        external nonReentrant whenNotPaused
-    {
+    /**
+     * @notice Process cross-chain alert from another network
+     * @param alertId Unique alert identifier
+     * @param sourceChain Source chain of the alert
+     * @param alertData Encoded alert data
+     * @param signature Cryptographic signature of the alert
+     */
+    function processCrossChainAlert(
+        bytes32 alertId,
+        uint256 sourceChain,
+        bytes calldata alertData,
+        bytes calldata signature
+    ) external nonReentrant whenNotPaused {
         if (processedCrossChainAlerts[alertId]) revert AlertAlreadyProcessed();
         if (!networkCoordinators[sourceChain].active) revert CoordinatorNotFound();
 
-        bytes32 messageHash = keccak256(abi.encodePacked(alertId, sourceChain, alertData, currentChainId));
+        bytes32 messageHash = keccak256(
+            abi.encodePacked(alertId, sourceChain, alertData, currentChainId)
+        );
         bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
         address signer = ethSignedMessageHash.recover(signature);
 
@@ -369,34 +532,61 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
 
         processedCrossChainAlerts[alertId] = true;
 
-        (bytes32 txId, uint256 riskScore, string memory alertType) = abi.decode(alertData, (bytes32, uint256, string));
+        (bytes32 txId, uint256 riskScore, string memory alertType) = abi.decode(
+            alertData,
+            (bytes32, uint256, string)
+        );
 
         if (riskScore >= 90) {
             _executeCrossChainMitigation(alertId, txId, alertType);
         }
     }
 
-    function _executeCrossChainMitigation(bytes32 alertId, bytes32 /*txId*/, string memory alertType) internal {
+    /**
+     * @dev Execute cross-chain mitigation
+     */
+    function _executeCrossChainMitigation(
+        bytes32 alertId,
+        bytes32, // txId - unused but kept for interface compatibility
+        string memory alertType
+    ) internal {
         uint256[] memory chainsInvolved = new uint256[](1);
         chainsInvolved[0] = currentChainId;
-        unchecked { totalMitigatedAttacks++; }
+        
+        unchecked { 
+            totalMitigatedAttacks++; 
+        }
+        
         emit CrossChainMitigationExecuted(alertId, chainsInvolved, alertType);
     }
 
-    /* ========== COORDINATED ATTACK REPORTING (GUARDIANS) ========== */
+    /* ========== GUARDIAN FUNCTIONS ========== */
 
-    function reportCrossChainAttack(address[] calldata attackerAddresses, uint256[] calldata chainsInvolved, uint256 totalValue, string calldata attackPattern)
-        external whenNotPaused
-    {
+    /**
+     * @notice Report coordinated cross-chain attack (Guardian only)
+     * @param attackerAddresses Array of attacker addresses
+     * @param chainsInvolved Array of involved chain IDs
+     * @param totalValue Total value involved in the attack
+     * @param attackPattern Description of the attack pattern
+     */
+    function reportCrossChainAttack(
+        address[] calldata attackerAddresses,
+        uint256[] calldata chainsInvolved,
+        uint256 totalValue,
+        string calldata attackPattern
+    ) external whenNotPaused {
         if (!hasRole(coreContract.GUARDIAN_ROLE(), msg.sender)) revert Unauthorized();
         if (attackerAddresses.length == 0) revert InvalidParam();
         if (chainsInvolved.length <= 1) revert InvalidParam();
 
-        bytes32 attackId = keccak256(abi.encodePacked(attackerAddresses, chainsInvolved, totalValue, block.timestamp));
+        bytes32 attackId = keccak256(
+            abi.encodePacked(attackerAddresses, chainsInvolved, totalValue, block.timestamp)
+        );
 
         SupportedChain[] memory chains = new SupportedChain[](chainsInvolved.length);
-        for (uint256 i = 0; i < chainsInvolved.length; ++i) {
+        for (uint256 i = 0; i < chainsInvolved.length; ) {
             chains[i] = _chainIdToSupportedChain(chainsInvolved[i]);
+            unchecked { ++i; }
         }
 
         crossChainAttacks[attackId] = CrossChainAttack({
@@ -413,6 +603,9 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
         _broadcastAttackAlert(attackId, chainsInvolved, attackerAddresses);
     }
 
+    /**
+     * @dev Convert chain ID to supported chain enum
+     */
     function _chainIdToSupportedChain(uint256 chainId) internal pure returns (SupportedChain) {
         if (chainId == 1) return SupportedChain.ETHEREUM;
         if (chainId == 137) return SupportedChain.POLYGON;
@@ -420,77 +613,145 @@ contract CrossChainMEVDefense is ReentrancyGuard, AccessControl, Pausable {
         if (chainId == 10) return SupportedChain.OPTIMISM;
         if (chainId == 56) return SupportedChain.BSC;
         if (chainId == 43114) return SupportedChain.AVALANCHE;
-        return SupportedChain.ETHEREUM;
+        return SupportedChain.ETHEREUM; // Default fallback
     }
 
-    function _broadcastAttackAlert(bytes32 attackId, uint256[] calldata chainsInvolved, address[] calldata attackerAddresses) internal {
+    /**
+     * @dev Broadcast attack alert to relevant chains
+     */
+    function _broadcastAttackAlert(
+        bytes32 attackId,
+        uint256[] calldata chainsInvolved,
+        address[] calldata attackerAddresses
+    ) internal {
         bytes memory alertData = abi.encode(attackId, attackerAddresses, "COORDINATED_ATTACK");
         emit CrossChainAlertBroadcast(attackId, chainsInvolved, "ATTACK_ALERT", alertData);
     }
 
-    /* ========== VIEW HELPERS ========== */
+    /* ========== VIEW FUNCTIONS ========== */
 
-    function verifyAlertSignature(bytes32 alertId, uint256 sourceChain, bytes calldata alertData, bytes calldata signature) external view returns (bool) {
+    /**
+     * @notice Verify alert signature
+     * @param alertId Alert identifier
+     * @param sourceChain Source chain ID
+     * @param alertData Alert data
+     * @param signature Cryptographic signature
+     * @return bool True if signature is valid
+     */
+    function verifyAlertSignature(
+        bytes32 alertId,
+        uint256 sourceChain,
+        bytes calldata alertData,
+        bytes calldata signature
+    ) external view returns (bool) {
         if (!networkCoordinators[sourceChain].active) return false;
-        bytes32 messageHash = keccak256(abi.encodePacked(alertId, sourceChain, alertData, currentChainId));
+        
+        bytes32 messageHash = keccak256(
+            abi.encodePacked(alertId, sourceChain, alertData, currentChainId)
+        );
         bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
         address signer = ethSignedMessageHash.recover(signature);
+        
         return signer == networkCoordinators[sourceChain].coordinatorAddress;
     }
 
+    /**
+     * @notice Get cross-chain transaction details
+     * @param txId Transaction ID
+     * @return CrossChainTransaction struct
+     */
     function getCrossChainTransaction(bytes32 txId) external view returns (CrossChainTransaction memory) {
         return crossChainTxs[txId];
     }
 
+    /**
+     * @notice Get cross-chain attack details
+     * @param attackId Attack ID
+     * @return CrossChainAttack struct
+     */
     function getCrossChainAttack(bytes32 attackId) external view returns (CrossChainAttack memory) {
         return crossChainAttacks[attackId];
     }
 
+    /**
+     * @notice Get bridge activity details
+     * @param bridgeContract Bridge contract address
+     * @return BridgeActivity struct
+     */
     function getBridgeActivity(address bridgeContract) external view returns (BridgeActivity memory) {
         return bridgeMonitoring[bridgeContract];
     }
 
+    /**
+     * @notice Check if coordinator is active
+     * @param chainId Chain ID
+     * @return bool True if coordinator is active
+     */
     function isCoordinatorActive(uint256 chainId) external view returns (bool) {
         return networkCoordinators[chainId].active;
     }
 
+    /**
+     * @notice Check if relayer is trusted
+     * @param chainId Chain ID
+     * @param relayer Relayer address
+     * @return bool True if relayer is trusted
+     */
     function isRelayerTrusted(uint256 chainId, address relayer) external view returns (bool) {
         return trustedRelayers[chainId][relayer];
     }
 
     /* ========== HEARTBEAT ========== */
 
+    /**
+     * @notice Update coordinator heartbeat
+     * @param chainId Chain ID of the coordinator
+     */
     function updateHeartbeat(uint256 chainId) external whenNotPaused {
         if (networkCoordinators[chainId].coordinatorAddress != msg.sender) revert Unauthorized();
         networkCoordinators[chainId].lastHeartbeat = block.timestamp;
     }
 
-    /* ========== EMERGENCY ========== */
+    /* ========== EMERGENCY FUNCTIONS ========== */
 
+    /**
+     * @notice Emergency pause (Emergency role only)
+     */
     function emergencyPauseCrossChain() external {
         if (!hasRole(coreContract.EMERGENCY_ROLE(), msg.sender)) revert Unauthorized();
         _pause();
     }
 
+    /**
+     * @notice Resume operations (Admin only)
+     */
     function resumeCrossChain() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
     }
 
-    /* ========== FALLBACKS ========== */
+    /* ========== SECURITY OVERRIDES ========== */
 
+    /**
+     * @dev Prevent accidental role renunciation
+     */
+    function renounceRole(bytes32 role, address account) public virtual override {
+        if (role == DEFAULT_ADMIN_ROLE) revert Unauthorized();
+        super.renounceRole(role, account);
+    }
+
+    /* ========== FALLBACK PROTECTION ========== */
+
+    /**
+     * @dev Reject direct ETH transfers
+     */
     receive() external payable {
         revert("Direct ETH transfers not allowed");
     }
 
+    /**
+     * @dev Reject invalid function calls
+     */
     fallback() external payable {
         revert("Invalid function call");
-    }
-
-    /* ========== OVERRIDES ========== */
-
-    function renounceRole(bytes32 role, address account) public virtual override {
-        // Prevent accidental renounce of admin
-        if (role == DEFAULT_ADMIN_ROLE) revert Unauthorized();
-        super.renounceRole(role, account);
     }
 }

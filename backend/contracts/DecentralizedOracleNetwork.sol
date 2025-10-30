@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "./AIOracle.sol";
 import "./PodiumGuardCore.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 /**
@@ -81,7 +81,7 @@ contract DecentralizedOracleNetwork is ReentrancyGuard, AccessControl {
     event NetworkParametersUpdated(string parameter, uint256 oldValue, uint256 newValue);
 
     constructor(address _coreContract) {
-        coreContract = PodiumGuardCore(_coreContract);
+        coreContract = PodiumGuardCore(payable(_coreContract));
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 

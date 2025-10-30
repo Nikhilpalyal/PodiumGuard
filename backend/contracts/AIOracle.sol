@@ -2,9 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "./PodiumGuardCore.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title AIOracle
@@ -69,7 +70,8 @@ contract AIOracle is ReentrancyGuard, AccessControl {
     event OracleSlashed(address indexed oracle, uint256 amount, string reason);
 
     constructor(address _coreContract) {
-        coreContract = PodiumGuardCore(_coreContract);
+        // PodiumGuardCore may have a payable fallback; cast address to payable when converting
+        coreContract = PodiumGuardCore(payable(_coreContract));
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 

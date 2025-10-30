@@ -3,8 +3,9 @@ pragma solidity ^0.8.20;
 
 import "./PodiumGuardCore.sol";
 import "./AIOracle.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 
 /**
  * @title AutomatedDefenseSystem
@@ -12,7 +13,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
  * @notice Implements real-time MEV protection with configurable response strategies
  */
 contract AutomatedDefenseSystem is ReentrancyGuard, AccessControl {
-    using Address for address;
+    // Address library v5 removed `isContract`; use `.code.length` checks directly where needed
 
     PodiumGuardCore public immutable coreContract;
     AIOracle public immutable aiOracle;
@@ -100,7 +101,8 @@ contract AutomatedDefenseSystem is ReentrancyGuard, AccessControl {
     );
 
     constructor(address _coreContract, address _aiOracle) {
-        coreContract = PodiumGuardCore(_coreContract);
+        // Cast to payable if the core contract has a payable fallback
+        coreContract = PodiumGuardCore(payable(_coreContract));
         aiOracle = AIOracle(_aiOracle);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         
@@ -234,7 +236,7 @@ contract AutomatedDefenseSystem is ReentrancyGuard, AccessControl {
         }
 
         // Complex contract interactions
-        if (data.length > 100 && to.isContract()) {
+        if (data.length > 100 && to.code.length > 0) {
             return DefenseStrategy.SANDWICH_PROTECTION;
         }
 
@@ -249,7 +251,7 @@ contract AutomatedDefenseSystem is ReentrancyGuard, AccessControl {
         address from,
         address to,
         uint256 value
-    ) internal view returns (uint256) {
+    ) internal returns (uint256) {
         if (strategy == DefenseStrategy.PASSIVE_MONITOR) {
             return 0;
         }
@@ -348,7 +350,7 @@ contract AutomatedDefenseSystem is ReentrancyGuard, AccessControl {
     ) internal returns (bool) {
         // In a real implementation, this would require proper authorization
         // This is a simplified version for demonstration
-        if (to.isContract()) {
+        if (to.code.length > 0) {
             (bool success,) = to.call{value: value}(data);
             return success;
         } else {
