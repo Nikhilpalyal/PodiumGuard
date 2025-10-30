@@ -25,45 +25,47 @@ const Services = () => {
   const services = [
     {
       id: 1,
-      title: 'Performance Tuning',
-      description: 'Maximize your vehicle\'s potential with our expert tuning services. Get the most out of your engine with our specialized tuning solutions.',
-      icon: '⚡',
+      title: 'MEV Defense',
+      description: 'Cutting-edge monitoring to protect against frontrunning bots and malicious race strategies in real time.',
+      icon: '🛡️',
     },
     {
       id: 2,
-      title: 'Custom Builds',
-      description: 'Create your dream vehicle with our bespoke customization options. From concept to completion, we bring your vision to life.',
-      icon: '🔧',
+      title: 'Dashboard AI',
+      description: 'Real-time AI dashboards for racing intelligence, car stats, driver control, and track analytics.',
+      icon: '📊',
     },
     {
       id: 3,
-      title: 'Maintenance',
-      description: 'Keep your vehicle in peak condition with our expert technicians. Regular maintenance to ensure optimal performance.',
-      icon: '🔍',
+      title: 'Audit & Proof Sector',
+      description: 'Automated audits and zero-knowledge proofs for secure digital racing data transparency.',
+      icon: '🔒',
     },
     {
       id: 4,
-      title: 'Restoration',
-      description: 'Bring classic vehicles back to their original glory. Meticulous attention to detail in every restoration project.',
-      icon: '✨',
+      title: 'Trophy AI',
+      description: 'Advanced achievement tracking and podium analytics powered by AI, awarding every winning strategy.',
+      icon: '🏆',
     },
     {
       id: 5,
-      title: 'Race Track Preparation',
-      description: 'Get your vehicle ready for the track with our professional race preparation services. From safety checks to performance optimization.',
-      icon: '🏁',
+      title: 'Telemetry System',
+      description: 'Precision AI telemetry engine for car vitals, crew radio, lap progress, strategy and more.',
+      icon: '📡',
     },
     {
       id: 6,
-      title: 'Advanced Diagnostics',
-      description: 'State-of-the-art diagnostic tools and expertise to identify and resolve complex automotive issues with precision.',
-      icon: '💻',
+      title: 'Insurance Pool',
+      description: 'Transparent, verifiable insurance coverage for digital racing incidents and rare events.',
+      icon: '🪙',
     }
   ];
 
   const [activeService, setActiveService] = useState(0);
   const sectionRef = useRef(null);
   const modelRef = useRef(null);
+  const viewerRef = useRef(null);
+  // Removed viewerContainerRef; use modelRef wrapper instead
 
   useEffect(() => {
     loadModelViewer();
@@ -84,12 +86,9 @@ const Services = () => {
           );
           setActiveService(serviceIndex);
           
-          // Update model position with smooth animation
+          // Keep model still on scroll; interaction handled by pointer movement
           if (modelRef.current) {
-            const rotateY = scrollProgress * 360; // One full rotation through all features
-            const translateY = Math.sin(scrollProgress * Math.PI) * 50; // Smooth up and down movement
-            modelRef.current.style.transform = 
-              `translateY(${translateY}px) rotateY(${rotateY}deg)`;
+            modelRef.current.style.transform = 'none';
           }
         }
       }
@@ -97,7 +96,39 @@ const Services = () => {
 
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial call
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Cursor-driven camera control
+    const handlePointerMove = (e) => {
+      if (!viewerRef.current || !modelRef.current) return;
+      const bounds = modelRef.current.getBoundingClientRect();
+      const x = (e.clientX - bounds.left) / bounds.width; // 0..1
+      const y = (e.clientY - bounds.top) / bounds.height; // 0..1
+
+      const normalizedX = (x - 0.5) * 2; // -1..1
+      const normalizedY = (y - 0.5) * 2; // -1..1
+
+      // Slightly stronger mapping for clearer response
+      const azimuthDeg = 90 + normalizedX * 120; // rotate left/right
+      const polarDeg = 60 - normalizedY * 35; // tilt up/down
+
+      // Zoom based on distance from center
+      const distanceFromCenter = Math.min(1, Math.hypot(normalizedX, normalizedY));
+      const radiusM = 1.5 + distanceFromCenter * 0.7; // 1.5m to 2.2m
+      const fovDeg = 35 + distanceFromCenter * 8; // subtle zoom
+
+      try {
+        viewerRef.current.cameraOrbit = `${azimuthDeg}deg ${polarDeg}deg ${radiusM}m`;
+        viewerRef.current.fieldOfView = `${fovDeg}deg`;
+      } catch (_) {}
+    };
+
+    const container = modelRef.current;
+    container?.addEventListener('pointermove', handlePointerMove);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      container?.removeEventListener('pointermove', handlePointerMove);
+    };
   }, [services.length]);
 
   return (
@@ -115,14 +146,15 @@ const Services = () => {
               {/* 3D Model */}
               <div className="model-3d">
                 <model-viewer
-                  src="/2014-ferrari-laferrari/source/FINAL_MODEL/FINAL_MODEL.fbx"
+                  src="/2014_ferrari.glb"
                   alt="Ferrari LaFerrari 3D model"
-                  auto-rotate
                   camera-controls
+                  touch-action="none"
                   shadow-intensity="1"
-                  camera-orbit="45deg 55deg 2.5m"
+                  camera-orbit="90deg 60deg 1.6m"
                   environment-image="neutral"
                   style={{ width: '100%', height: '100%' }}
+                  ref={viewerRef}
                 >
                   <div className="progress-bar" slot="progress-bar">
                     <div className="progress-bar-container">
@@ -154,34 +186,34 @@ const Services = () => {
           </div>
 
           {/* Services list on the right */}
-          <div className="services-grid">
-            {services.map((service, index) => (
-              <div 
-                key={service.id} 
-                className={`service-card ${index === activeService ? 'active' : ''}`}
-                style={{
-                  opacity: index === activeService ? 1 : 0,
-                  transform: `translateX(${index === activeService ? '0' : '100%'})`,
-                  position: index === activeService ? 'relative' : 'absolute',
-                  transition: 'all 0.6s ease-in-out',
-                  top: 0,
-                  right: 0,
-                  width: '100%'
-                }}
-              >
-                <div className="service-icon">{service.icon}</div>
-                <div className="service-content">
-                  <h3 className="service-title">{service.title}</h3>
-                  <p className="service-description">{service.description}</p>
-                </div>
-                <button className="learn-more">
-                  <span>Explore</span>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
+          <div className="pitlane-panel">
+            {/* Removed telemetry-header */}
+            <div className="pitlane-track">
+              <div className="lap-markers">
+                {services.map((_, i) => (
+                  <div key={i} className={`marker ${i === activeService ? 'active' : ''}`}> 
+                    <span/>
+                  </div>
+                ))}
               </div>
-            ))}
+              <div className="pit-box">
+                {services.map((service, index) => (
+                  <div 
+                    key={service.id}
+                    className={`pit-card ${index === activeService ? 'active' : ''}`}
+                    style={{ zIndex: index === activeService ? 3 : 1 }}
+                  >
+                    <div className="pit-card-accent"/>
+                    <div className="pit-card-head">
+                      <div className="pit-icon">{service.icon}</div>
+                      <h3 className="pit-title">{service.title}</h3>
+                    </div>
+                    <p className="pit-desc">{service.description}</p>
+                    <button className="cta">Enter Pit</button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
