@@ -1,8 +1,8 @@
 /* Services Section */
 .services-section {
-  padding: 8rem 2rem 6rem 2rem;
+  padding: 5rem 2rem 4rem 2rem;
   background: #000000;
-  min-height: 200vh;
+  min-height: 120vh;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -16,12 +16,12 @@
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  padding-top: 2rem;
+  padding-top: 1rem;
 }
 
 .section-header {
   text-align: center;
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
 }
 
 .section-title {

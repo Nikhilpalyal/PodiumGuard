@@ -1,5 +1,5 @@
 .telemetry-page {
-  padding: calc(28px + 110px) 28px 40px 28px;
+  padding: 28px 28px 40px 28px;
   color: #eaeaea;
   background: radial-gradient(900px 400px at 8% 8%, rgba(255,30,30,0.03), transparent), #050505;
 }

@@ -149,11 +149,47 @@ export default function Dashboard() {
       </section>
 
       <section className="charts">
-        <div className="card">Attack Frequency
+        <div className="card">
+          <h3>Attack Frequency</h3>
           <div className="card-graphic">📈</div>
+          <div className="chart-stats">
+            <div className="stat-line">
+              <span className="stat-label">24h Attacks:</span>
+              <span className="stat-value">47</span>
+            </div>
+            <div className="stat-line">
+              <span className="stat-label">Avg Response:</span>
+              <span className="stat-value">0.3s</span>
+            </div>
+          </div>
         </div>
-        <div className="card">Gas Optimization
-          <div className="card-graphic">🔧</div>
+        <div className="card">
+          <h3>Gas Optimization</h3>
+          <div className="card-graphic">⚡</div>
+          <div className="chart-stats">
+            <div className="stat-line">
+              <span className="stat-label">Gas Saved:</span>
+              <span className="stat-value">34.8 ETH</span>
+            </div>
+            <div className="stat-line">
+              <span className="stat-label">Efficiency:</span>
+              <span className="stat-value">+127%</span>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <h3>Network Status</h3>
+          <div className="card-graphic">�️</div>
+          <div className="chart-stats">
+            <div className="stat-line">
+              <span className="stat-label">Nodes:</span>
+              <span className="stat-value">1,247</span>
+            </div>
+            <div className="stat-line">
+              <span className="stat-label">Coverage:</span>
+              <span className="stat-value">99.97%</span>
+            </div>
+          </div>
         </div>
       </section>
     </div>

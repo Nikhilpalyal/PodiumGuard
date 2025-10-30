@@ -1,0 +1,148 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: podiumguard-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: podiumguard
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - podiumguard-network
+
+  # Redis Cache (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: podiumguard-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - podiumguard-network
+
+  # AI Detection Engine (Flask)
+  ai-engine:
+    build:
+      context: ./ai-engine
+      dockerfile: Dockerfile
+    container_name: podiumguard-ai-engine
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=app.py
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./ai-engine/logs:/app/logs
+    depends_on:
+      - redis
+    networks:
+      - podiumguard-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Node.js Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: podiumguard-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongodb:27017/podiumguard
+      - AI_ENGINE_URL=http://ai-engine:5001
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logs:/app/logs
+      - ./deployments:/app/deployments
+    depends_on:
+      - mongodb
+      - ai-engine
+    networks:
+      - podiumguard-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: podiumguard-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+    networks:
+      - podiumguard-network
+
+  # Prometheus Monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: podiumguard-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - podiumguard-network
+
+  # Grafana Dashboard (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: podiumguard-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - podiumguard-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  podiumguard-network:
+    driver: bridge

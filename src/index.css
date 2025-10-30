@@ -21,17 +21,23 @@ body {
 }
 
 :root {
-  /* Core theme colors for black + red look */
-  --bg-dark-1: #040405; /* page background deep black */
-  --bg-dark-2: #09090a; /* secondary dark */
-  --accent: #ff2b2b; /* primary red accent */
-  --accent-strong: #ff1f1f;
-  --accent-rgb: 255,43,43; /* used for rgba shadows */
-  --muted: rgba(255,255,255,0.06);
-  --muted-2: rgba(255,255,255,0.12);
-  --card-bg: rgba(255,255,255,0.02);
-  --glass: rgba(10,10,10,0.85);
-  --success: #2ce69a;
+  /* Enhanced black + red cyberpunk theme */
+  --bg-dark-1: #000000; /* Pure black background */
+  --bg-dark-2: #0a0000; /* Deep red-black secondary */
+  --accent: #ff2b2b; /* Bright red accent */
+  --accent-strong: #ff1f1f; /* Stronger red */
+  --accent-rgb: 255,43,43; /* RGB values for rgba usage */
+  --accent-dark: #cc0000; /* Darker red for contrast */
+  --muted: rgba(255,255,255,0.08);
+  --muted-2: rgba(255,255,255,0.15);
+  --card-bg: rgba(255,43,43,0.03);
+  --glass: rgba(5,5,5,0.9);
+  --success: #00ff66;
+  --warning: #ffaa00;
+  --error: #ff3366;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #999999;
 }
 
 /* Animations & utilities */

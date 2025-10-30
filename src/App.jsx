@@ -11,6 +11,8 @@ import Telemetry from './pages/Telemetry';
 import Mempool from './pages/Mempool';
 import Audit from './pages/Audit';
 import Auth from './components/auth/Auth';
+import MEVDefenseDashboard from './components/MEVDefenseDashboard';
+import EnhancedMempool from './components/EnhancedMempool';
 
 function App() {
   const [route, setRoute] = useState(window.location.pathname);
@@ -26,13 +28,13 @@ function App() {
       <Navbar />
       <main>
         {route === '/dashboard' ? (
-          <Dashboard />
+          <MEVDefenseDashboard />
         ) : route === '/insurancepool' ? (
           <InsurancePool />
         ) : route === '/telemetry' ? (
           <Telemetry />
         ) : route === '/mempool' ? (
-          <Mempool />
+          <EnhancedMempool />
         ) : route === '/audit' ? (
           <Audit />
         ) : route === '/auth' ? (
