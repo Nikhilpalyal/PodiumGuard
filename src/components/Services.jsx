@@ -25,38 +25,32 @@ const Services = () => {
   const services = [
     {
       id: 1,
-      title: 'MEV Defense',
-      description: 'Cutting-edge monitoring to protect against frontrunning bots and malicious race strategies in real time.',
+      title: 'MEV Defence',
+      description: 'Real-time protection against frontrunning, sandwiching, and malicious MEV tactics.',
       icon: '🛡️',
     },
     {
       id: 2,
-      title: 'Dashboard AI',
-      description: 'Real-time AI dashboards for racing intelligence, car stats, driver control, and track analytics.',
-      icon: '📊',
+      title: 'Audit',
+      description: 'Comprehensive audits for contracts, systems, and on-chain logic integrity.',
+      icon: '🔎',
     },
     {
       id: 3,
-      title: 'Audit & Proof Sector',
-      description: 'Automated audits and zero-knowledge proofs for secure digital racing data transparency.',
-      icon: '🔒',
-    },
-    {
-      id: 4,
-      title: 'Trophy AI',
-      description: 'Advanced achievement tracking and podium analytics powered by AI, awarding every winning strategy.',
+      title: 'Trophy',
+      description: 'Podium-grade achievements and analytics for performance and reliability.',
       icon: '🏆',
     },
     {
-      id: 5,
-      title: 'Telemetry System',
-      description: 'Precision AI telemetry engine for car vitals, crew radio, lap progress, strategy and more.',
+      id: 4,
+      title: 'Telemetry Engine',
+      description: 'High-fidelity telemetry streams for metrics, alerts, and operational insights.',
       icon: '📡',
     },
     {
-      id: 6,
+      id: 5,
       title: 'Insurance Pool',
-      description: 'Transparent, verifiable insurance coverage for digital racing incidents and rare events.',
+      description: 'Transparent, verifiable coverage with real-time AI risk assessment.',
       icon: '🪙',
     }
   ];
