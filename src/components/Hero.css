@@ -1,0 +1,224 @@
+/* Hero Section */
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+  margin: 0;
+  padding: 0;
+}
+
+.video-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hero-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.hero-content {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  max-width: 600px;
+  width: 100%;
+  color: white;
+  z-index: 3;
+  text-align: left;
+  padding: 0;
+}
+
+.tagline {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #e10600;
+  font-weight: 600;
+}
+
+.headline {
+  font-size: 3rem;
+  margin: 0;
+  line-height: 1.2;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .headline {
+    font-size: 2rem;
+  }
+  
+  .tagline {
+    font-size: 1.2rem;
+  }
+  
+  .hero-content {
+    padding: 6rem 2rem 2rem;
+    margin-top: 2rem;
+  }
+}
+
+.text-section {
+  z-index: 10;
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+  margin-top: 2rem;
+  max-width: 90%;
+}
+
+.tagline {
+  font-size: 1.3rem;
+  color: #ffd700;
+  margin: 2rem 0 1.5rem 0; /* Add top margin to push tagline down */
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  font-style: italic;
+}
+
+.headline {
+  font-size: 3.5rem;
+  color: white;
+  line-height: 1.2;
+  font-weight: 700;
+  font-family: 'Georgia', serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.car-section {
+  position: relative;
+  height: 500px;
+  perspective: 1000px;
+}
+
+.track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  transform: none;
+  transform-style: flat;
+}
+
+.track::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -20%;
+  right: -20%;
+  height: 0;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+}
+
+.track::after {
+  content: '';
+  position: absolute;
+  top: 60%;
+  left: -20%;
+  right: -20%;
+  height: 0;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+}
+
+.track-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  animation: none;
+}
+
+@keyframes speedLine {
+  0% {
+    opacity: 0.3;
+    transform: translateX(-100px);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+    transform: translateX(100px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@media (max-width: 1024px) {
+  .content {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .headline {
+    font-size: 2.8rem;
+  }
+
+  .car-section {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 2rem 1.5rem;
+  }
+
+  .headline {
+    font-size: 2rem;
+  }
+
+  .tagline {
+    font-size: 1.1rem;
+  }
+
+  .car-section {
+    height: 300px;
+  }
+}
