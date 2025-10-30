@@ -1,51 +1,39 @@
 import React from 'react';
 import './Crew.css';
+import diyaImg from '../assets/diya.jpeg';
+import meghaImg from '../assets/megha.jpeg';
+import nikhilImg from '../assets/nikhil.jpeg';
+import radhikaImg from '../assets/radhika.jpeg';
 
 const Crew = () => {
   const teamMembers = [
     {
       id: 1,
-      name: 'Alex Johnson',
-      role: 'Lead Technician',
-      image: '/team/tech1.jpg',
-      social: {
-        twitter: '#',
-        linkedin: '#',
-        instagram: '#'
-      }
+      name: 'Diya',
+      role: 'Engineer',
+      image: diyaImg,
+      social: { twitter: '#', linkedin: '#', instagram: '#' }
     },
     {
       id: 2,
-      name: 'Sarah Williams',
-      role: 'Performance Specialist',
-      image: '/team/tech2.jpg',
-      social: {
-        twitter: '#',
-        linkedin: '#',
-        instagram: '#'
-      }
+      name: 'Megha',
+      role: 'Analyst',
+      image: meghaImg,
+      social: { twitter: '#', linkedin: '#', instagram: '#' }
     },
     {
       id: 3,
-      name: 'Mike Chen',
-      role: 'Master Mechanic',
-      image: '/team/tech3.jpg',
-      social: {
-        twitter: '#',
-        linkedin: '#',
-        instagram: '#'
-      }
+      name: 'Nikhil',
+      role: 'Developer',
+      image: nikhilImg,
+      social: { twitter: '#', linkedin: '#', instagram: '#' }
     },
     {
       id: 4,
-      name: 'Emily Rodriguez',
-      role: 'Custom Build Expert',
-      image: '/team/tech4.jpg',
-      social: {
-        twitter: '#',
-        linkedin: '#',
-        instagram: '#'
-      }
+      name: 'Radhika',
+      role: 'Lead',
+      image: radhikaImg,
+      social: { twitter: '#', linkedin: '#', instagram: '#' }
     }
   ];
 

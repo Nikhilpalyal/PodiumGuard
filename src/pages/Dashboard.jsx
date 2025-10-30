@@ -54,7 +54,7 @@ export default function Dashboard() {
       <section className="dash-hero">
         <div className="dash-title">
           <h1>REAL-TIME MEV DEFENSE DASHBOARD</h1>
-          <p className="subtitle">F1 PIT BUNKER • LIVE TRANSACTION SECURITY</p>
+          <p className="subtitle">PODIUM GARAGE • LIVE TRANSACTION SECURITY</p>
         </div>
 
         <div className="stats-grid">

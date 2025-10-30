@@ -176,3 +176,29 @@
   .metrics-row{ flex-direction:column; align-items:center }
   .roi-row{ grid-template-columns:1fr }
 }
+
+/* === UI/UX Enhancements (overrides) === */
+.insurance-hero { text-align:center; max-width:1100px; margin:0 auto 22px }
+.insurance-hero h1 { color:var(--accent); font-weight:900; letter-spacing:0.12em; margin-bottom:10px; font-size:28px; text-transform:uppercase }
+.insurance-hero .subtitle { color:rgba(255,255,255,0.65); font-size:13px; margin-bottom:16px }
+
+.metrics-row { display:flex; gap:14px; justify-content:center; margin-bottom:20px }
+.metric { background:var(--card-bg); padding:14px 18px; border-radius:12px; border:1px solid rgba(var(--accent-rgb),0.12); min-width:200px; transform:translateY(8px); opacity:0; animation:fadeUp 420ms cubic-bezier(.22,.9,.32,1) forwards; transition:transform .18s ease, box-shadow .18s ease }
+.metric:hover { transform:translateY(0); box-shadow:0 10px 30px rgba(var(--accent-rgb),0.12) }
+.m-label { font-size:12px; color:#ffb3b3; text-transform:uppercase; letter-spacing:0.08em }
+.m-value { font-weight:900; margin-top:6px; font-size:20px }
+
+.pool-health { gap:14px }
+.health-bar { flex:1; height:18px; background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06)); border-radius:12px; overflow:hidden; border:1px solid rgba(var(--accent-rgb),0.12); position:relative }
+
+.hero-actions { display:flex; gap:12px; justify-content:center; align-items:center; margin-top:14px }
+.join-btn { padding:12px 28px; min-width:180px; border-radius:14px; background:#0b0b0b; color:#ffffff; font-weight:900; font-size:15px; border:2px solid rgba(255,255,255,0.95); box-shadow:0 12px 40px rgba(0,0,0,0.6), 0 6px 18px rgba(255,40,40,0.06) inset; transform:translateY(0); transition:transform .12s ease, box-shadow .12s ease, opacity .12s }
+.join-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px }
+
+.analytics { max-width:900px; margin:22px auto; padding:16px; border-radius:12px; border:1px solid rgba(var(--accent-rgb),0.12); background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06)) }
+
+.roi-box { padding:16px; border-radius:12px; border:1px solid rgba(var(--accent-rgb),0.12); background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06)); text-align:center; transition:transform .18s ease, box-shadow .18s ease }
+.roi-box:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(var(--accent-rgb),0.12) }
+.roi-box:focus-within { outline:2px solid var(--accent); outline-offset:2px }
+
+.scale-range:focus-visible{ outline:2px solid var(--accent) }
