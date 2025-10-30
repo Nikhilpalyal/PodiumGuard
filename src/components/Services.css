@@ -47,13 +47,106 @@
 .services-layout {
   display: flex;
   gap: 4rem;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   max-width: 1400px;
   width: 100%;
   position: relative;
   min-height: 100vh;
 }
+
+/* Right Panel - Pit Lane Theme */
+.pitlane-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.telemetry-header {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+}
+
+.telemetry-item { display:flex; align-items:center; gap: .6rem; color: #ddd; }
+.telemetry-item .label { font-size:.8rem; letter-spacing: .08em; color:#aaa; text-transform: uppercase; }
+.telemetry-item .value { font-weight:700; color:#fff; }
+.telemetry-item .tag { background:#e10600; color:#fff; padding:.2rem .5rem; border-radius: 6px; font-size:.8rem; }
+.telemetry-item .bar { flex:1; height:8px; background:rgba(255,255,255,.08); border-radius:8px; overflow:hidden; }
+.telemetry-item .bar i { display:block; height:100%; background:linear-gradient(90deg,#0ad,#0f8); }
+
+.pitlane-track {
+  position: relative;
+  flex: 1;
+  border-radius: 16px;
+  background: radial-gradient(1200px 600px at 20% 10%, rgba(225,6,0,0.08), transparent 60%), #0b0b0b;
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+
+.lap-markers {
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.marker { position: relative; opacity:.35; transition: opacity .3s ease; }
+.marker.active { opacity:1; }
+.marker span { position:absolute; inset:0; background: linear-gradient(180deg,#e10600,transparent); border-radius: 4px; }
+
+.pit-box {
+  position: absolute;
+  inset: 0 0 0 48px;
+  padding: 1.25rem 1.25rem 1.25rem 1rem;
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.pit-card {
+  position: relative;
+  background: rgba(20,20,20,.7);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 14px;
+  padding: 1.1rem 1.1rem 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform .4s cubic-bezier(.2,.6,.2,1), box-shadow .4s ease, background .3s ease, border-color .3s ease;
+  transform: perspective(800px) rotateX(0deg) translateZ(0);
+}
+
+.pit-card::after { /* subtle grid */
+  content: '';
+  position: absolute; inset:0; pointer-events:none; border-radius: 14px;
+  background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(80% 80% at 30% 0%, #000 60%, transparent 100%);
+}
+
+.pit-card-accent { position:absolute; left:-2px; top:-2px; bottom:-2px; width:4px; border-radius: 4px; background: linear-gradient(180deg,#e10600,transparent); opacity:.9; }
+
+.pit-card-head { display:flex; align-items:center; gap:.8rem; }
+.pit-icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(225,6,0,.12); color:#e10600; border-radius:10px; font-size:1.2rem; }
+.pit-title { color:#fff; font-size:1.1rem; font-weight:700; letter-spacing:.02em; text-transform:uppercase; }
+.pit-desc { color:#bdbdbd; margin:.6rem 0 1rem; line-height:1.5; font-size:.95rem; }
+
+.pit-card.active { background: rgba(225,6,0,.08); border-color: rgba(225,6,0,.25); box-shadow: 0 10px 30px rgba(225,6,0,.15); transform: perspective(800px) rotateX(2deg) translateZ(6px); }
+.pit-card:hover { transform: perspective(800px) rotateX(4deg) translateZ(10px) translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+
+.cta { align-self:flex-start; background: transparent; border: 1.5px solid #e10600; color:#fff; padding:.5rem 1rem; border-radius: 999px; cursor:pointer; font-weight:600; letter-spacing:.04em; transition: all .25s ease; }
+.cta:hover { background:#e10600; box-shadow: 0 6px 18px rgba(225,6,0,.35); transform: translateY(-1px); }
 
 /* 3D Model Styles */
 .model-container {
@@ -70,7 +163,7 @@
 .model-container {
   position: sticky;
   top: 50px;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 60px);
   width: 50%;
   perspective: 1000px;
 }
@@ -90,7 +183,7 @@
   height: 100%;
   top: 0;
   left: 0;
-  opacity: 0.8;
+  opacity: 1;
   z-index: 1;
 }
 
@@ -101,6 +194,7 @@
   top: 0;
   left: 0;
   z-index: 2;
+  pointer-events: none;
 }
 
 .car-image {
@@ -116,6 +210,7 @@
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 
 .car-image::before {
@@ -295,13 +390,17 @@ model-viewer {
   .model-container {
     max-width: 600px;
     margin: 0 auto;
-    height: 500px;
+    height: 420px;
+    position: relative;
+    top: 0;
   }
   
   .services-grid {
     max-width: 800px;
     margin: 0 auto;
   }
+  .pitlane-panel { width: 100%; }
+  .pitlane-track { min-height: 520px; }
 }
 
 @media (max-width: 768px) {
