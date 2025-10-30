@@ -9,7 +9,7 @@ const Footer = () => {
       <div className="footer-container">
         <div className="footer-top">
           <div className="footer-brand">
-            <h3 className="footer-logo">F1<span>Garage</span></h3>
+            <h3 className="footer-logo">Podium<span>Garage</span></h3>
             <p className="footer-tagline">Pushing the limits of automotive excellence</p>
             <div className="social-links">
               <a href="#" aria-label="Twitter">
@@ -39,10 +39,11 @@ const Footer = () => {
             <div className="footer-column">
               <h4 className="footer-heading">Services</h4>
               <ul>
-                <li><a href="#services">Performance Tuning</a></li>
-                <li><a href="#services">Custom Builds</a></li>
-                <li><a href="#services">Maintenance</a></li>
-                <li><a href="#services">Restoration</a></li>
+                <li><a href="#services">MEV Defence</a></li>
+                <li><a href="#services">Audit</a></li>
+                <li><a href="#services">Trophy</a></li>
+                <li><a href="#services">Telemetry Engine</a></li>
+                <li><a href="#services">Insurance Pool</a></li>
               </ul>
             </div>
 
@@ -55,26 +56,26 @@ const Footer = () => {
                 <svg className="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="#e10600">
                   <path d="M12 0C7.2 0 3 4.2 3 9c0 5.25 7.5 13.5 7.5 13.5.6.75 1.5.75 2.1 0C13.5 22.5 21 14.25 21 9c0-4.8-4.2-9-9-9zm0 12c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/>
                 </svg>
-                123 Racing Avenue, Speedway, SP 12345
+                Chitkara University
               </li>
               <li>
                 <svg className="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="#e10600">
                   <path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57-.35-.11-.74-.03-1.02.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1C8.7 6.45 8.5 5.25 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/>
                 </svg>
-                +1 (555) 123-4567
+                8569865761
               </li>
               <li>
                 <svg className="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="#e10600">
                   <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
-                info@f1garage.com
+                radhikasood3105@gmail.com
               </li>
             </ul>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; {currentYear} F1 Garage. All rights reserved.</p>
+          <p>&copy; {currentYear} Podium Garage. All rights reserved.</p>
           <div className="footer-legal">
             <a href="#">Privacy Policy</a>
             <span>|</span>

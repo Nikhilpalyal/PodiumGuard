@@ -3,8 +3,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  padding-top: 120px; /* offset fixed navbar height to prevent overlap */
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--bg-dark-2) 0%, var(--bg-dark-1) 100%);
   min-height: 100vh;
   color: white;
 }
@@ -19,7 +20,7 @@
   font-size: 2.5rem;
   margin-bottom: 10px;
   font-weight: 700;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  background: linear-gradient(45deg, var(--accent), var(--accent-strong));
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -38,7 +39,7 @@
   padding: 24px;
   margin-bottom: 30px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -46,7 +47,7 @@
 }
 
 .connect-btn {
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
   color: white;
   border: none;
   padding: 12px 24px;
@@ -55,12 +56,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.35);
 }
 
 .connect-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.5);
 }
 
 .connect-btn:disabled {
@@ -112,7 +113,7 @@
 }
 
 .protection-btn {
-  background: linear-gradient(45deg, #2ed573, #17a085);
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
   color: white;
   border: none;
   padding: 16px 32px;
@@ -121,24 +122,24 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(46, 213, 115, 0.3);
+  box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.35);
   margin-bottom: 16px;
   min-width: 250px;
 }
 
 .protection-btn.enable {
-  background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.3);
+  background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+  box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.35);
 }
 
 .protection-btn.active {
-  background: linear-gradient(45deg, #2ed573, #17a085);
-  box-shadow: 0 4px 20px rgba(46, 213, 115, 0.4);
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.45);
 }
 
 .protection-btn:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 6px 25px rgba(46, 213, 115, 0.5);
+  box-shadow: 0 6px 25px rgba(var(--accent-rgb), 0.5);
 }
 
 .protection-btn:disabled {
@@ -151,11 +152,11 @@
 }
 
 .protection-text {
-  background: rgba(46, 213, 115, 0.1);
-  color: #2ed573;
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent);
   padding: 12px 20px;
   border-radius: 12px;
-  border: 1px solid rgba(46, 213, 115, 0.3);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
   display: inline-block;
   font-size: 0.95rem;
 }
@@ -179,11 +180,11 @@
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   padding: 24px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -240,7 +241,7 @@
   border-radius: 20px;
   padding: 30px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.15);
   margin-bottom: 30px;
 }
 
@@ -298,7 +299,7 @@
 }
 
 .detection-card {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
   border-radius: 12px;
   padding: 20px;
   border-left: 4px solid var(--risk-color);
@@ -307,7 +308,7 @@
 
 .detection-card:hover {
   transform: translateX(5px);
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .detection-header {
@@ -393,7 +394,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.4);
   padding: 16px 24px;
   border-radius: 12px;
   font-size: 0.9rem;
@@ -467,6 +468,6 @@
 /* Dark theme adjustments */
 @media (prefers-color-scheme: dark) {
   .mev-defense-dashboard {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    background: linear-gradient(135deg, var(--bg-dark-2) 0%, var(--bg-dark-1) 100%);
   }
 }
