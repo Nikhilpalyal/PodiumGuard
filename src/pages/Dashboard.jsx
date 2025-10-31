@@ -177,7 +177,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        <div className="card">
+        <div className="card link-card" onClick={() => { window.history.pushState({}, '', '/track'); window.dispatchEvent(new PopStateEvent('popstate')); }}>
           <h3>Network Status</h3>
           <div className="card-graphic">�️</div>
           <div className="chart-stats">
