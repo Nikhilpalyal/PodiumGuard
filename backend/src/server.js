@@ -13,12 +13,15 @@ import MEVDefenseSystem from './services/mevDefenseSystem.js';
 import ContractService from './services/contractService.js';
 import AIService from './services/aiService.js';
 import SafeModeService from './services/safeModeService.js';
+import InsuranceService from './services/insuranceService.js';
 
 import transactionRoutes from './routes/transactions.js';
 import detectionRoutes from './routes/detections.js';
 import statsRoutes from './routes/stats.js';
 import simulateRoutes from './routes/simulate.js';
 import mevDefenseRoutes from './routes/mevDefense.js';
+import insuranceRoutes, { setInsuranceService } from './routes/insurance.js';
+import raceTelemetryRoutes, { setRaceTelemetryServices } from './routes/raceTelemetry.js';
 
 dotenv.config();
 
@@ -50,7 +53,7 @@ class PodiumGuardServer {
         methods: ["GET", "POST"]
       }
     });
-    this.port = process.env.PORT || 5000;
+    this.port = process.env.PORT || 5001;
     
     this.setupMiddleware();
     this.setupRoutes();
@@ -104,6 +107,8 @@ class PodiumGuardServer {
     this.app.use('/api/stats', statsRoutes);
     this.app.use('/api/simulate', simulateRoutes);
     this.app.use('/api/mev', mevDefenseRoutes);
+    this.app.use('/api/insurance', insuranceRoutes);
+    this.app.use('/api/race', raceTelemetryRoutes);
 
     // MEV Defense specific endpoints
     this.app.get('/api/system/status', (req, res) => {
@@ -180,12 +185,12 @@ class PodiumGuardServer {
     try {
       // Initialize services in order
       logger.info('🚀 Initializing MEV Defense System services...');
-      
+
       // 1. Initialize Contract Service
       this.contractService = new ContractService();
       await this.contractService.initialize();
       logger.info('✅ Contract service initialized');
-      
+
       // 2. Initialize AI Service
       this.aiService = new AIService();
       const aiHealthy = await this.aiService.testConnection();
@@ -194,44 +199,63 @@ class PodiumGuardServer {
       } else {
         logger.info('✅ AI service initialized');
       }
-      
+
       // 3. Initialize Safe Mode Service
       this.safeModeService = new SafeModeService(this.contractService, this.io);
       logger.info('✅ Safe mode service initialized');
-      
-      // 4. Initialize MEV Defense System (replaces mempool listener)
+
+      // 4. Initialize Insurance Service
+      this.insuranceService = new InsuranceService(this.io);
+      await this.insuranceService.initialize();
+      logger.info('✅ Insurance service initialized');
+
+      // 5. Initialize MEV Defense System (replaces mempool listener)
       this.mevDefenseSystem = new MEVDefenseSystem(
-        this.aiService, 
-        this.contractService, 
-        this.safeModeService, 
+        this.aiService,
+        this.contractService,
+        this.safeModeService,
         this.io
       );
-      
+
       // Start the MEV Defense System
       await this.mevDefenseSystem.start();
       logger.info('🛡️ MEV Defense System started successfully');
-      
+
+      // 6. Initialize Race Telemetry System
+      const RaceTelemetrySystem = (await import('./services/raceTelemetrySystem.js')).default;
+      this.raceTelemetrySystem = new RaceTelemetrySystem(this.io);
+      await this.raceTelemetrySystem.start();
+      logger.info('🏎️ Race Telemetry System started successfully');
+
       logger.info('🎉 All services initialized successfully');
-      
+
       // Store services globally for route access
       global.contractService = this.contractService;
       global.aiService = this.aiService;
       global.safeModeService = this.safeModeService;
+      global.insuranceService = this.insuranceService;
       global.mevDefenseSystem = this.mevDefenseSystem;
-      
+      global.raceTelemetrySystem = this.raceTelemetrySystem;
+
       // Store in app locals as backup
       this.app.locals.contractService = this.contractService;
       this.app.locals.aiService = this.aiService;
       this.app.locals.safeModeService = this.safeModeService;
+      this.app.locals.insuranceService = this.insuranceService;
       this.app.locals.mevDefenseSystem = this.mevDefenseSystem;
+      this.app.locals.raceTelemetrySystem = this.raceTelemetrySystem;
+
+      // Set services for routes
+      setInsuranceService(this.insuranceService);
+      setRaceTelemetryServices(this.raceTelemetrySystem.getServices());
 
       logger.info('🎉 MEV Defense System is ready to protect against MEV attacks!');
-      
+
       logger.info('All services initialized and integrated successfully');
-      
+
       // Log system status
       this.logSystemStatus();
-      
+
     } catch (error) {
       logger.error('Service initialization error:', error);
       process.exit(1);

@@ -39,8 +39,8 @@ function Navbar() {
           <a href="/insurancepool" className="nav-image-link" onClick={(e) => navigate(e, '/insurancepool')}>
             <img src={img2} alt="Insurance Pool" className="nav-image" />
           </a>
-          <a href="/page3" className="nav-image-link" onClick={(e) => navigate(e, '/page3')}>
-            <img src={img3} alt="Page 3" className="nav-image" />
+          <a href="/track" className="nav-image-link" onClick={(e) => navigate(e, '/track')}>
+            <img src={img3} alt="3D Track" className="nav-image" />
           </a>
         </div>
       </div>

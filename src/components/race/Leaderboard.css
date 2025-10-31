@@ -1,0 +1,278 @@
+.leaderboard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.leaderboard-header h3 {
+  margin: 0;
+  color: #2fe2d5;
+  font-size: 1.1rem;
+}
+
+.leaderboard-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: #ccc;
+}
+
+.car-count {
+  color: #ff9b9b;
+}
+
+.update-time {
+  color: #4caf50;
+}
+
+.leaderboard-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.leaderboard-item:hover {
+  background: rgba(255, 75, 75, 0.1);
+  transform: translateX(4px);
+}
+
+.leaderboard-item.selected {
+  background: rgba(255, 75, 75, 0.2);
+  border-left: 4px solid #ff4b4b;
+}
+
+.leaderboard-item:last-child {
+  border-bottom: none;
+}
+
+.position-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 60px;
+}
+
+.position-number {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, #333, #555);
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.driver-section {
+  flex: 1;
+  margin-left: 1rem;
+}
+
+.driver-name {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.team-name {
+  font-size: 0.8rem;
+  color: #ccc;
+}
+
+.stats-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 120px;
+  margin-left: 1rem;
+}
+
+.primary-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.speed {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.unit {
+  font-size: 0.8rem;
+  color: #ccc;
+}
+
+.secondary-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.stat-item .label {
+  font-size: 0.7rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-item .value {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #2fe2d5;
+}
+
+.performance-indicator {
+  width: 8px;
+  margin-left: 1rem;
+}
+
+.performance-bar {
+  width: 100%;
+  height: 40px;
+  border-radius: 4px;
+  background: #333;
+}
+
+.performance-bar.exceptional {
+  background: linear-gradient(to bottom, #4caf50, #66bb6a);
+}
+
+.performance-bar.strong {
+  background: linear-gradient(to bottom, #2196f3, #42a5f5);
+}
+
+.performance-bar.steady {
+  background: linear-gradient(to bottom, #ff9800, #ffb74d);
+}
+
+.performance-bar.struggling {
+  background: linear-gradient(to bottom, #ff5722, #ff7043);
+}
+
+.performance-bar.critical {
+  background: linear-gradient(to bottom, #f44336, #ef5350);
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.no-data p {
+  margin: 0;
+  font-style: italic;
+}
+
+/* Scrollbar styling */
+.leaderboard-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaderboard-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 75, 75, 0.5);
+  border-radius: 3px;
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 75, 75, 0.7);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .leaderboard-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .position-section {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: auto;
+  }
+
+  .stats-section {
+    align-items: flex-start;
+    margin-left: 0;
+  }
+
+  .secondary-stats {
+    justify-content: flex-start;
+  }
+
+  .performance-indicator {
+    width: 100%;
+    height: 4px;
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+
+  .performance-bar {
+    height: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .leaderboard-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .secondary-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .stat-item {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+}

@@ -1,0 +1,345 @@
+.track3d-page {
+  padding: calc(80px + 24px) 24px 24px;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 80% 0%, rgba(0,255,200,0.06), transparent 60%),
+    linear-gradient(135deg, #0b0f1a 0%, #0a0d18 35%, #0a0c16 100%);
+  /* grid lines */
+  background-image:
+    linear-gradient(rgba(0, 255, 220, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 220, 0.05) 1px, transparent 1px),
+    radial-gradient(1200px 600px at 80% 0%, rgba(0,255,200,0.06), transparent 60%),
+    linear-gradient(135deg, #0b0f1a 0%, #0a0d18 35%, #0a0c16 100%);
+  background-size: 40px 40px, 40px 40px, auto, auto;
+  background-position: 0 0, 0 0, 0 0, 0 0;
+  color: var(--text-primary);
+}
+
+.track3d-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.track3d-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.track3d-header p { opacity: 0.75 }
+
+/* HUD top bar */
+.hud-top {
+  position: sticky;
+  top: 64px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(0, 255, 190, 0.25);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(0, 255, 190, 0.06), rgba(0,0,0,0.15));
+  box-shadow: 0 8px 26px rgba(0,255,190,0.08), inset 0 0 0 1px rgba(0,255,190,0.12);
+}
+.hud-title {
+  color: #00ffc8;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+.hud-live { color: #7bffc8; display: inline-flex; align-items: center; gap: 8px; font-weight: 700 }
+.live-dot { width: 10px; height: 10px; border-radius: 999px; background: #00ff77; box-shadow: 0 0 12px #00ff77; display: inline-block }
+
+/* HUD left stat stack */
+.hud-left {
+  position: absolute;
+  left: 24px;
+  top: 140px;
+  width: 280px;
+  display: grid;
+  gap: 12px;
+}
+.hud-card {
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 255, 190, 0.25);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(0, 255, 190, 0.06), rgba(0,0,0,0.2));
+  box-shadow: 0 10px 28px rgba(0,255,190,0.08), inset 0 0 0 1px rgba(0,255,190,0.12);
+}
+.hud-card.warning { border-color: rgba(255, 230, 0, 0.35); box-shadow: 0 10px 28px rgba(255, 230, 0, 0.08) }
+.hud-card .label { font-size: 11px; opacity: 0.8; letter-spacing: 0.12em }
+.hud-card .value { font-size: 18px; font-weight: 800 }
+.hud-card .value.accent { color: #00ffc8; text-shadow: 0 0 10px rgba(0,255,200,0.35) }
+
+/* HUD right alert banner */
+.hud-alert {
+  position: absolute;
+  right: 24px;
+  top: 150px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: #ff5a6b;
+  border: 1px solid rgba(255, 90, 107, 0.4);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 90, 107, 0.1), rgba(0,0,0,0.25));
+  box-shadow: 0 10px 28px rgba(255, 90, 107, 0.15);
+}
+.hud-alert .dot { width: 10px; height: 10px; border-radius: 50%; background: #ff3b4f; box-shadow: 0 0 12px #ff3b4f }
+.hud-alert .text { font-weight: 700; letter-spacing: 0.06em }
+
+/* HUD bottom metrics */
+.hud-bottom {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 46px;
+  padding: 10px 0 0;
+  border-top: 1px solid rgba(0,255,190,0.18);
+}
+.hud-bottom .metric { display: grid; gap: 4px; text-align: center }
+.hud-bottom .metric .label { font-size: 11px; opacity: 0.7; letter-spacing: 0.12em }
+.hud-bottom .metric .value { font-weight: 900 }
+.hud-bottom .metric .value.neon { color: #00ffc8; text-shadow: 0 0 12px rgba(0,255,200,0.5) }
+
+.track3d-container {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.info-panel {
+  position: sticky;
+  top: 96px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 16px;
+  height: calc(100vh - 140px);
+  overflow: hidden;
+}
+.panel-empty { opacity: 0.6; text-align: center; margin-top: 30% }
+.panel-content h3 { margin: 8px 0 12px 0 }
+.kv { display: grid; grid-template-columns: 90px 1fr; gap: 8px; margin-bottom: 8px; align-items: center }
+.kv code { font-family: 'Monaco', monospace; word-break: break-all }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 11px; letter-spacing: 0.06em }
+.badge.safe { background: rgba(46,213,115,0.15); color: #2ed573; border: 1px solid rgba(46,213,115,0.35) }
+.badge.critical { background: rgba(255,170,0,0.15); color: #ffaa00; border: 1px solid rgba(255,170,0,0.35) }
+.badge.unsafe { background: rgba(255,71,87,0.15); color: #ff4757; border: 1px solid rgba(255,71,87,0.35) }
+.close-btn { margin-top: 12px; background: linear-gradient(90deg, var(--accent), var(--accent-strong)); color: #fff; border: none; border-radius: 8px; padding: 10px 14px; cursor: pointer; box-shadow: 0 6px 20px rgba(var(--accent-rgb),0.22) }
+
+/* Track */
+.track3d {
+  height: calc(100vh - 160px);
+  background: radial-gradient(800px 400px at 90% 10%, rgba(var(--accent-rgb),0.04), transparent),
+              linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  margin-left: auto; /* right-align the track subtly */
+  max-width: 980px;
+}
+
+.perspective-wrapper {
+  perspective: 900px;
+  height: 100%;
+}
+
+.lanes {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px 24px 12px 12px; /* add a bit more right padding for aesthetics */
+  transform-style: preserve-3d;
+}
+
+.lane {
+  position: relative;
+  background: radial-gradient(60% 100% at 50% 0%, rgba(0,0,0,0.65), rgba(0,0,0,0.8));
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  transform: rotateX(10deg);
+  box-shadow: inset 0 18px 40px rgba(0,0,0,0.6), inset 0 -10px 20px rgba(255,255,255,0.03);
+}
+
+.lane::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.16),
+    rgba(255,255,255,0.16) 18px,
+    transparent 18px,
+    transparent 32px
+  );
+  transform: translateX(-50%);
+}
+
+/* Hurdles (obstacles) */
+.hurdle {
+  position: absolute;
+  left: 12%;
+  width: 76%;
+  height: 10px;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb),0.30), rgba(var(--accent-rgb),0.05));
+  border: 1px solid rgba(var(--accent-rgb),0.45);
+  border-radius: 10px;
+  top: calc(var(--y) * 18% + 6%);
+  filter: drop-shadow(0 10px 26px rgba(var(--accent-rgb),0.18));
+}
+
+/* Safety bands to visually indicate zones */
+.safety-band {
+  position: absolute;
+  left: 8%;
+  width: 84%;
+  height: 9%;
+  top: calc(var(--i) * 16.5% + 4%);
+  border-radius: 10px;
+  opacity: 0.35;
+  mix-blend-mode: screen;
+  filter: blur(0.5px) drop-shadow(0 0 12px rgba(255,255,255,0.06));
+  animation: bandPulse 3.2s ease-in-out infinite;
+}
+.safety-band.safe { background: linear-gradient(90deg, rgba(46,213,115,0.18), rgba(46,213,115,0.05)); box-shadow: inset 0 0 0 1px rgba(46,213,115,0.35) }
+.safety-band.critical { background: linear-gradient(90deg, rgba(255,170,0,0.18), rgba(255,170,0,0.05)); box-shadow: inset 0 0 0 1px rgba(255,170,0,0.35) }
+.safety-band.unsafe { background: linear-gradient(90deg, rgba(255,71,87,0.18), rgba(255,71,87,0.05)); box-shadow: inset 0 0 0 1px rgba(255,71,87,0.35) }
+
+@keyframes bandPulse {
+  0%,100% { opacity: 0.28 }
+  50% { opacity: 0.5 }
+}
+
+/* Car (transaction) */
+.car {
+  position: absolute;
+  left: 50%;
+  width: 72%;
+  height: 52px;
+  transform: translateX(-50%);
+  animation: drive var(--speed, 7s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform, filter;
+  z-index: 2;
+  cursor: pointer;
+}
+/* Speed trail pseudo-element */
+.car .car-body::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: -30px;
+  height: 28px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0));
+  filter: blur(6px);
+  transform: translateY(-12px);
+  opacity: 0.0;
+  transition: opacity .2s ease;
+}
+.car:hover .car-body::after { opacity: 0.45 }
+.car.paused { animation-play-state: paused }
+.car .car-body {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.06), 0 10px 24px rgba(0,0,0,0.6);
+  position: relative;
+}
+.car.safe .car-body { outline: 2px solid rgba(46,213,115,0.9); box-shadow: inset 0 0 0 2px rgba(46,213,115,0.45), 0 0 26px rgba(46,213,115,0.35) }
+.car.critical .car-body { outline: 2px solid rgba(255,170,0,0.7); box-shadow: inset 0 0 0 2px rgba(255,170,0,0.35), 0 0 22px rgba(255,170,0,0.22) }
+.car.unsafe .car-body { outline: 2px solid rgba(255,71,87,0.7); box-shadow: inset 0 0 0 2px rgba(255,71,87,0.35), 0 0 22px rgba(255,71,87,0.22) }
+
+.shadow {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -8px;
+  height: 12px;
+  filter: blur(8px);
+  background: linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,0,0,0.2));
+  border-radius: 999px;
+}
+.trail {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: -40px;
+  height: 40px;
+  background: linear-gradient(180deg, rgba(46,213,115,0.35), rgba(46,213,115,0));
+  filter: blur(6px);
+  opacity: 0.6;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.hovercard {
+  position: absolute;
+  left: 50%;
+  bottom: 56px;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.86);
+  border: 1px solid rgba(46,213,115,0.25);
+  padding: 8px 10px;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .16s ease, transform .16s ease;
+  white-space: nowrap;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+}
+.hovercard .hash { font-family: 'Monaco', monospace; font-size: 12px; opacity: 0.9 }
+.hovercard .meta { font-size: 12px; opacity: 0.7 }
+.car:hover .hovercard { opacity: 1; transform: translateX(-50%) translateY(-2px) }
+
+@keyframes drive {
+  0% { transform: translate(-50%, -80px) }
+  100% { transform: translate(-50%, calc(100% + 80px)) }
+}
+
+/* Curdles (MEV bots) */
+.curdle {
+  position: absolute;
+  left: 20%;
+  width: 60%;
+  height: 36px;
+  filter: drop-shadow(0 0 16px rgba(255,71,87,0.35));
+  background: conic-gradient(from 0deg, rgba(255,71,87,0.6), rgba(255,71,87,0.25), rgba(255,71,87,0.6));
+  clip-path: polygon(10% 20%, 30% 0%, 60% 10%, 80% 30%, 90% 60%, 70% 80%, 40% 90%, 15% 70%);
+  animation: drift var(--speed, 8s) linear infinite, jitter 1.1s infinite ease-in-out;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes drift {
+  0% { transform: translateY(-80px) translateX(0) }
+  30% { transform: translateY(20%) translateX(-6%) }
+  60% { transform: translateY(60%) translateX(8%) }
+  100% { transform: translateY(120%) translateX(-4%) }
+}
+@keyframes jitter {
+  0%,100% { filter: blur(0px) }
+  50% { filter: blur(1.2px) }
+}
+
+@media (max-width: 980px) {
+  .track3d-container { grid-template-columns: 1fr }
+  .info-panel { position: relative; top: 0; height: auto }
+  .track3d { height: 65vh; margin-left: 0 }
+}
+
+
