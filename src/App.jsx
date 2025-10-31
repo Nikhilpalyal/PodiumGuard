@@ -13,6 +13,7 @@ import Audit from './pages/Audit';
 import Auth from './components/auth/Auth';
 import MEVDefenseDashboard from './components/MEVDefenseDashboard';
 import EnhancedMempool from './components/EnhancedMempool';
+import Track3D from './pages/Track3D';
 
 function App() {
   const [route, setRoute] = useState(window.location.pathname);
@@ -39,6 +40,8 @@ function App() {
           <Audit />
         ) : route === '/auth' ? (
           <Auth />
+        ) : route === '/track' ? (
+          <Track3D />
         ) : (
           <>
             <Hero />
